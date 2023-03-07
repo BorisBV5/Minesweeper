@@ -37,8 +37,21 @@ num6=pygame.image.load("media/num6.png")
 num7=pygame.image.load("media/num7.png")
 num8=pygame.image.load("media/num8.png")
 mine=pygame.image.load("media/mine.png")
-minefail=pygame.image.load("media/minefail.png")
+mineFail=pygame.image.load("media/minefail.png")
 mineCount=0
+
+def checkNumber(y,x):
+    minesAroundCount=0
+    if columnPos!=0 and rowPos!=0 and grid[rowPos-1][columnPos-1]==90: minesAroundCount+=1
+    if columnPos!=19 and rowPos!=0 and grid[rowPos-1][columnPos+1]==90 : minesAroundCount+=1
+    if rowPos!=0 and grid[rowPos-1][columnPos]==90: minesAroundCount+=1
+    if columnPos!=0 and rowPos!=19 and grid[rowPos+1][columnPos-1]==90: minesAroundCount+=1
+    if columnPos!=19 and rowPos!=19 and grid[rowPos+1][columnPos+1]==90: minesAroundCount+=1
+    if rowPos!=19 and grid[rowPos+1][columnPos]==90 : minesAroundCount+=1
+    if columnPos!=19 and grid[rowPos][columnPos+1]==90: minesAroundCount+=1
+    if columnPos!=0 and grid[rowPos][columnPos-1]==90: minesAroundCount+=1
+    print(minesAroundCount)
+    return minesAroundCount
 
 while running:
 
@@ -52,7 +65,11 @@ while running:
                 columnPos=mousePos[0]//(20)
                 rowPos=(mousePos[1]//(20))-3
                 if grid[rowPos][columnPos]==0:
-                    grid[rowPos][columnPos]=99
+                    numMines=checkNumber(rowPos, columnPos)
+                    if numMines>0:
+                        grid[rowPos][columnPos]=numMines
+                    else:
+                        grid[rowPos][columnPos]=99
                 if count ==0:
                     start=pygame.time.get_ticks()
                     count+=1
@@ -73,7 +90,8 @@ while running:
             if (minePosColumn, minePosRow)!=(columnPos-1, rowPos-1) and (minePosColumn, minePosRow)!=(columnPos, rowPos-1) and (minePosColumn, minePosRow)!=(columnPos+1, rowPos-1) and (minePosColumn, minePosRow)!=(columnPos-1, rowPos) and (minePosColumn, minePosRow)!=(columnPos, rowPos) and (minePosColumn, minePosRow)!=(columnPos+1, rowPos) and (minePosColumn, minePosRow)!=(columnPos-1, rowPos+1) and (minePosColumn, minePosRow)!=(columnPos, rowPos+1) and (minePosColumn, minePosRow)!=(columnPos+1, rowPos+1) and grid[minePosRow][minePosColumn]!=90:       
                 grid[minePosRow][minePosColumn]=90
                 mineCount=mineCount+1
-            if mineCount==90:
+                print(minePosRow, minePosColumn)
+            if mineCount==80:
                 break
         count+=1
     
@@ -89,6 +107,22 @@ while running:
                 screen.blit(flag,[20*(column),(20*(row))+60])
             elif grid[row][column]==90:
                 screen.blit(mine,[20*(column),(20*(row))+60])
+            elif grid[row][column]==1:
+                screen.blit(num1,[20*(column),(20*(row))+60])
+            elif grid[row][column]==2:
+                screen.blit(num2,[20*(column),(20*(row))+60])
+            elif grid[row][column]==3:
+                screen.blit(num3,[20*(column),(20*(row))+60])
+            elif grid[row][column]==4:
+                screen.blit(num4,[20*(column),(20*(row))+60])
+            elif grid[row][column]==5:
+                screen.blit(num5,[20*(column),(20*(row))+60])
+            elif grid[row][column]==6:
+                screen.blit(num6,[20*(column),(20*(row))+60])
+            elif grid[row][column]==7:
+                screen.blit(num7,[20*(column),(20*(row))+60])
+            elif grid[row][column]==8:
+                screen.blit(num8,[20*(column),(20*(row))+60])
             #pygame.draw.rect(screen, color, [(margin + width) * column + margin, (margin + height) * row + margin+60, width, height])
     minutes=((pygame.time.get_ticks() - start)//60000)
     seconds=((pygame.time.get_ticks() - start)//1000)-minutes*60
@@ -102,5 +136,3 @@ while running:
 
 
 pygame.quit()
-
-
