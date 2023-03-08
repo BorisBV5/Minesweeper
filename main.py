@@ -2,10 +2,12 @@
 #hidden tags empty=99 mine=90
 #dificulty ez=90
 
+import sys
 import random
 import pygame
 pygame.init()
 
+sys.setrecursionlimit(3500)
 screen = pygame.display.set_mode([400, 460])
 pygame.display.set_caption("Minesweeper")
 programIcon = pygame.image.load('media/icon.png')
@@ -38,20 +40,66 @@ num7=pygame.image.load("media/num7.png")
 num8=pygame.image.load("media/num8.png")
 mine=pygame.image.load("media/mine.png")
 mineFail=pygame.image.load("media/minefail.png")
+notMine=pygame.image.load("media/notmine.png")
 mineCount=0
 
 def checkNumber(y,x):
     minesAroundCount=0
-    if columnPos!=0 and rowPos!=0 and grid[rowPos-1][columnPos-1]==90: minesAroundCount+=1
-    if columnPos!=19 and rowPos!=0 and grid[rowPos-1][columnPos+1]==90 : minesAroundCount+=1
-    if rowPos!=0 and grid[rowPos-1][columnPos]==90: minesAroundCount+=1
-    if columnPos!=0 and rowPos!=19 and grid[rowPos+1][columnPos-1]==90: minesAroundCount+=1
-    if columnPos!=19 and rowPos!=19 and grid[rowPos+1][columnPos+1]==90: minesAroundCount+=1
-    if rowPos!=19 and grid[rowPos+1][columnPos]==90 : minesAroundCount+=1
-    if columnPos!=19 and grid[rowPos][columnPos+1]==90: minesAroundCount+=1
-    if columnPos!=0 and grid[rowPos][columnPos-1]==90: minesAroundCount+=1
-    print(minesAroundCount)
+    if x!=0 and y!=0 and grid[y-1][x-1]==90: minesAroundCount+=1
+    if x!=19 and y!=0 and grid[y-1][x+1]==90 : minesAroundCount+=1
+    if y!=0 and grid[y-1][x]==90: minesAroundCount+=1
+    if x!=0 and y!=19 and grid[y+1][x-1]==90: minesAroundCount+=1
+    if x!=19 and y!=19 and grid[y+1][x+1]==90: minesAroundCount+=1
+    if y!=19 and grid[y+1][x]==90 : minesAroundCount+=1
+    if x!=19 and grid[y][x+1]==90: minesAroundCount+=1
+    if x!=0 and grid[y][x-1]==90: minesAroundCount+=1
     return minesAroundCount
+
+def flood1(b, a):
+    mineNum=checkNumber(b,a)
+    if grid[b][a]<1:
+        if checkNumber(b,a)>0:
+            grid[b][a]=checkNumber(b,a)
+        else:
+            grid[b][a]=99
+            if a<19 and b<19:
+                flood1(b+1, a+1)
+            if a>0 and b<19:
+                flood1(b+1, a-1)
+            if b<19:
+                flood1(b+1, a)
+            if a<19 and b>0:
+                flood1(b-1, a+1)
+            if a>0 and b>0:
+                flood1(b-1, a-1)
+            if b>0:
+                flood1(b-1, a)
+            if a>0:
+                flood2(b,a-1)
+            if a<19:
+                flood2(b,a+1)
+    else:
+        return
+
+def flood2(b, a):
+    mineNum=checkNumber(b,a)
+    if grid[b][a]<1:
+        if checkNumber(b,a)>0:
+            grid[b][a]=checkNumber(b,a)
+        else:
+            grid[b][a]=99
+            if a>0:
+                flood2(b,a-1)
+            if a<19:
+                flood2(b,a+1)
+            if b>0:
+                flood2(b-1,a)
+            if b<19:
+                flood2(b+1,a)
+    else:
+        return
+
+
 
 while running:
 
@@ -65,11 +113,14 @@ while running:
                 columnPos=mousePos[0]//(20)
                 rowPos=(mousePos[1]//(20))-3
                 if grid[rowPos][columnPos]==0:
+                    if count==2:
+                        flood1(rowPos, columnPos)
                     numMines=checkNumber(rowPos, columnPos)
-                    if numMines>0:
-                        grid[rowPos][columnPos]=numMines
-                    else:
-                        grid[rowPos][columnPos]=99
+                    #if numMines>0:
+                        #grid[rowPos][columnPos]=numMines
+                    #else:
+                        #grid[rowPos][columnPos]=99
+                        #flood(rowPos, columnPos)
                 if count ==0:
                     start=pygame.time.get_ticks()
                     count+=1
@@ -90,9 +141,9 @@ while running:
             if (minePosColumn, minePosRow)!=(columnPos-1, rowPos-1) and (minePosColumn, minePosRow)!=(columnPos, rowPos-1) and (minePosColumn, minePosRow)!=(columnPos+1, rowPos-1) and (minePosColumn, minePosRow)!=(columnPos-1, rowPos) and (minePosColumn, minePosRow)!=(columnPos, rowPos) and (minePosColumn, minePosRow)!=(columnPos+1, rowPos) and (minePosColumn, minePosRow)!=(columnPos-1, rowPos+1) and (minePosColumn, minePosRow)!=(columnPos, rowPos+1) and (minePosColumn, minePosRow)!=(columnPos+1, rowPos+1) and grid[minePosRow][minePosColumn]!=90:       
                 grid[minePosRow][minePosColumn]=90
                 mineCount=mineCount+1
-                print(minePosRow, minePosColumn)
             if mineCount==80:
                 break
+        flood1(rowPos, columnPos)
         count+=1
     
     screen.fill(lgray)
@@ -106,7 +157,7 @@ while running:
             elif grid[row][column]==100:
                 screen.blit(flag,[20*(column),(20*(row))+60])
             elif grid[row][column]==90:
-                screen.blit(mine,[20*(column),(20*(row))+60])
+                screen.blit(tile,[20*(column),(20*(row))+60])
             elif grid[row][column]==1:
                 screen.blit(num1,[20*(column),(20*(row))+60])
             elif grid[row][column]==2:
