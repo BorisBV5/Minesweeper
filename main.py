@@ -1,16 +1,14 @@
-#tags: empty=0 mine=9 1=1 2=2 3=3 4=4 5=5 6=6 7=7 8=8 flag=100
-#hidden tags empty=99 mine=90
+#tags: empty=0 mine=90 1=1 2=2 3=3 4=4 5=5 6=6 7=7 8=8 flag=100
+#hidden tags: empty=99 flaged mine=900
 #dificulty ez=48 med=72 hard=80
 
-import sys
 import random
 import pygame
 pygame.init()
 
-sys.setrecursionlimit(3500)
 screen = pygame.display.set_mode([400, 460])
 pygame.display.set_caption("Minesweeper")
-programIcon = pygame.image.load('media/icon.png')
+programIcon = pygame.image.load("media/icon.png")
 pygame.display.set_icon(programIcon)
 width=20
 height=20
@@ -58,7 +56,6 @@ def checkNumber(y,x):
     return minesAroundCount
 
 def flood(b, a):
-    mineNum=checkNumber(b,a)
     if grid[b][a]<1:
         if checkNumber(b,a)>0:
             grid[b][a]=checkNumber(b,a)
@@ -138,7 +135,7 @@ while running:
             elif grid[row][column]==100:
                 screen.blit(flag,[20*(column),(20*(row))+60])
             elif grid[row][column]==90:
-                screen.blit(tile,[20*(column),(20*(row))+60])
+                screen.blit(mine,[20*(column),(20*(row))+60])
             elif grid[row][column]==1:
                 screen.blit(num1,[20*(column),(20*(row))+60])
             elif grid[row][column]==2:
