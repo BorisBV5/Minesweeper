@@ -1,11 +1,20 @@
 #tags: empty=0 mine=90 1=1 2=2 3=3 4=4 5=5 6=6 7=7 8=8 flag=10
-#hidden tags: empty=-1 flaged mine=900
+#hidden tags: empty=-1 flaged mine=900 mine clicked=999 mines reveal=909
 #dificulty ez=48 med=72 hard=80
 
 import random
 import pygame
-pygame.init()
+import pygamepopup
+from pygamepopup.components import Button, InfoBox, TextElement
+from pygamepopup.constants import BUTTON_SIZE
+from pygamepopup.menu_manager import MenuManager
 
+pygame.init()
+pygamepopup.init()
+
+
+
+popUp= pygame.display.set_mode([200, 150])
 screen = pygame.display.set_mode([400, 460])
 pygame.display.set_caption("Minesweeper")
 programIcon = pygame.image.load("media/icon.png")
@@ -43,11 +52,23 @@ notMine=pygame.image.load("media/notmine.png")
 button=pygame.image.load("media/button.png")
 buttonPressed=pygame.image.load("media/buttonpressed.png")
 buttonSurprised=pygame.image.load("media/surprise.png")
+buttonDefeat=pygame.image.load("media/fail.png")
+buttonWin=pygame.image.load("media/win.png")
+topBg=pygame.image.load("media/topbg.png")
 mineCount=0
 easy=48
 medium=72
 hard=80
-falgCount=0
+flagCount=0
+buttonIsPressed=False
+buttonIsSurprised=False
+tileIsPressed=False
+defeat=False
+win=False
+myMenuManager = MenuManager(popUp)
+newGamePopUp_id="newGamePopUp"
+selectedDificulty='easy'
+notClicked=0
 
 def checkNumber(y,x):
     minesAroundCount=0
@@ -86,59 +107,106 @@ def flood(b, a):
     else:
         return
 
-#def generate(y,x):
-#    for minePos in range (200):
-#        minePosColumn=random.randint(0,19)
-#        minePosRow=random.randint(0,19)
-#        if (minePosColumn, minePosRow)!=(x-1, y-1) and (minePosColumn, minePosRow)!=(x, y-1) and (minePosColumn, minePosRow)!=(x+1, y-1) and (minePosColumn, minePosRow)!=(x-1, y) and (minePosColumn, minePosRow)!=(x, y) and (minePosColumn, minePosRow)!=(x+1, y) and (minePosColumn, minePosRow)!=(x-1, y+1) and (minePosColumn, minePosRow)!=(x, y+1) and (minePosColumn, minePosRow)!=(x+1, y+1) and grid[minePosRow][minePosColumn]!=90:       
-#            grid[minePosRow][minePosColumn]=90
-#            mineCount=mineCount+1
-#       if mineCount==48:
-#            break
+def messageWindow():
+   global mb
+   mb=Toplevel(Tk())
+   mb.title('New Game')
+   mb.geometry('100x200')
+   Button(mb, text='Click here', padx=10, pady=5,).pack(pady=20)
+
+def dificultySelect(num):
+    if num==1:
+        selectedDificulty='easy'
+
+newGamePopUp = InfoBox(
+    "New Game",
+    [
+        TextElement(
+            text="Select dificulty"
+        )
+    ],
+    [
+        Button(
+                title="Easy",
+                callback=lambda: dificultySelect(1),
+        )
+    ]
+)
 
 while running:
 
     mousePos=pygame.mouse.get_pos()
     columnPos=mousePos[0]//(20)
     rowPos=(mousePos[1]//(20))-3
-    buttonIsPressed=False
-    buttonIsSurprised=False
+    screen.blit(topBg, [0,0])
+    notClicked=0
+
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
         elif event.type==pygame.MOUSEBUTTONDOWN:
+            if mousePos[1]>10 and mousePos[1]<50 and mousePos[0]>180 and mousePos[0]<220:
+                buttonIsPressed=True
+            if defeat or win:
+                break
             if mousePos[1]<60:
                 break
             if event.button==1:
-                if grid[rowPos][columnPos]==0:
-                    if count==2:
-                        flood(rowPos, columnPos)
-                    if pygame.mouse.get_pressed()[0]:
-                        buttonIsSurprised=True
-                if count ==0:
-                    start=pygame.time.get_ticks()
-                    count+=1
+                if grid[rowPos][columnPos]==0 or grid[rowPos][columnPos]==90:    
+                    tileIsPressed=True
+                    buttonIsSurprised=True
             elif event.button==3:
                 if grid[rowPos][columnPos]==10:
                     grid[rowPos][columnPos]=0
-                    falgCount-=1
+                    flagCount-=1
                 elif grid[rowPos][columnPos]==0:
                     grid[rowPos][columnPos]=10
-                    falgCount+=1
+                    flagCount+=1
                 elif grid[rowPos][columnPos]==90:
                     grid[rowPos][columnPos]=900
-                    falgCount+=1
+                    flagCount+=1
                 elif grid[rowPos][columnPos]==900:
                     grid[rowPos][columnPos]=90
-                    falgCount-=1
+                    flagCount-=1
                 if count ==0:
                     start=pygame.time.get_ticks()                
                     count+=1
-
-    if mousePos[1]>10 and mousePos[1]<50 and mousePos[0]>180 and mousePos[0]<220:
-        if pygame.mouse.get_pressed()[0]:
-            buttonIsPressed=True
+        elif event.type==pygame.MOUSEBUTTONUP:
+            if event.button==1:
+                tileIsPressed=False
+                buttonIsPressed=False
+                buttonIsSurprised=False
+                if mousePos[1]>10 and mousePos[1]<50 and mousePos[0]>180 and mousePos[0]<220:
+                    #myMenuManager.open_menu(newGamePopUp)
+                    grid = [[0 for x in range(20)] for y in range(20)]
+                    count=0
+                    start=0
+                    timer=myFont.render("00:00", 1, red)
+                    mineCount=0
+                    flagCount=0
+                    buttonIsPressed=False
+                    defeat=False
+                    win=False
+                    notClicked=0
+                if defeat or win:
+                    break
+                if mousePos[1]<60:
+                    break
+                if grid[rowPos][columnPos]==0:
+                    if count==2:
+                        flood(rowPos, columnPos)
+                elif grid[rowPos][columnPos]==90:
+                    grid[rowPos][columnPos]=999
+                    defeat=True
+                    end=pygame.time.get_ticks()
+                    for i in range(len(grid)):
+                        for j in range(len(grid[i])):
+                            if grid[i][j]==90:
+                                grid[i][j]=909
+                if count ==0:
+                    start=pygame.time.get_ticks()
+                    count+=1
 
     if count==1:
         for minePos in range (200):
@@ -151,19 +219,32 @@ while running:
                 break
         flood(rowPos, columnPos)
         count+=1
-    
-    screen.fill(lgray)
-    firstRowCounter=0
+
+    for i in range(len(grid)):
+        for j in range(len(grid[i])):
+            if grid[i][j]==0:
+                notClicked+=1
+
+    if count==2:
+        if mineCount-flagCount==0 or notClicked==0:
+            for i in range(len(grid)):
+                for j in range(len(grid[i])):
+                    if grid[i][j]==0:
+                        grid[i][j]=900
+            win=True
+
+
+    print(notClicked)
     for row in range(20):
         for column in range(20):
             color = lgray
-            screen.blit(tile,[20*column,(20*row)+60])
+            screen.blit(tile,[20*column,(20*row)+60])        
             if grid[row][column] == -1:
                 screen.blit(bgtile,[20*(column),(20*(row))+60])
             elif grid[row][column]==10:
                 screen.blit(flag,[20*(column),(20*(row))+60])
             elif grid[row][column]==90:
-                screen.blit(mine,[20*(column),(20*(row))+60])
+                screen.blit(tile,[20*(column),(20*(row))+60])
             elif grid[row][column]==900:
                 screen.blit(flag,[20*(column),(20*(row))+60])
             elif grid[row][column]==1:
@@ -182,8 +263,19 @@ while running:
                 screen.blit(num7,[20*(column),(20*(row))+60])
             elif grid[row][column]==8:
                 screen.blit(num8,[20*(column),(20*(row))+60])
-    minutes=((pygame.time.get_ticks() - start)//60000)
-    seconds=((pygame.time.get_ticks() - start)//1000)-minutes*60
+            elif grid[row][column]==999:
+                screen.blit(mineFail,[20*(column),(20*(row))+60])
+            elif grid[row][column]==909:
+                screen.blit(mine,[20*(column),(20*(row))+60])
+            if tileIsPressed and grid[rowPos][columnPos] not in (1, 2, 3, 4, 5, 6, 7, 8, 10, 900) and mousePos[1]>60:
+                screen.blit(bgtile,[20*(columnPos),(20*(rowPos))+60]) 
+    
+    if defeat:
+        minutes=((end - start)//60000)
+        seconds=((end - start)//1000)-minutes*60
+    else:
+        minutes=((pygame.time.get_ticks() - start)//60000)
+        seconds=((pygame.time.get_ticks() - start)//1000)-minutes*60
     if count>0: 
         timer=myFont.render(str(minutes).zfill(2)+":"+str(seconds).zfill(2), 1, red)
     if count>0: 
@@ -193,9 +285,13 @@ while running:
         screen.blit(buttonPressed, [180, 10])
     elif buttonIsSurprised:
         screen.blit(buttonSurprised, [180, 10])
+    elif defeat:
+        screen.blit(buttonDefeat, [180, 10])
+    elif win:
+        screen.blit(buttonWin, [180, 10])
     else: 
         screen.blit(button, [180, 10])
-    mines=myFont.render(str(mineCount-falgCount).zfill(4), 1, red)
+    mines=myFont.render(str(mineCount-flagCount).zfill(4), 1, red)
     pygame.draw.rect(screen, black, [27 , 17, 68, 27])
     screen.blit(mines, [29, 20])
     pygame.draw.rect(screen, black, [305 , 17, 71, 27])
