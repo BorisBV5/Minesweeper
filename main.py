@@ -86,7 +86,8 @@ def checkFlags(y,x):
     if x!=19:
         if grid[y][x+1]==10 or grid[y][x+1]==900: flagsAroundCount+=1
     if x!=0:
-        if grid[y][x-1]==10 or grid[y][x-1]==10: flagsAroundCount+=1
+        if grid[y][x-1]==10 or grid[y][x-1]==900: flagsAroundCount+=1
+    print (flagsAroundCount)
     return flagsAroundCount
 
 def flood(b, a):
@@ -114,10 +115,6 @@ def flood(b, a):
     else:
         return
 
-def dificultySelect(num):
-    if num==1:
-        selectedDificulty='easy'
-
 while running:
 
     mousePos=pygame.mouse.get_pos()
@@ -138,6 +135,9 @@ while running:
                 break
             if event.button==1:
                 if grid[rowPos][columnPos]==0 or grid[rowPos][columnPos]==90:    
+                    tileIsPressed=True
+                    buttonIsSurprised=True
+                elif grid[rowPos][columnPos]>0 and grid[rowPos][columnPos]<9:
                     tileIsPressed=True
                     buttonIsSurprised=True
             elif event.button==3:
@@ -187,6 +187,48 @@ while running:
                         for j in range(len(grid[i])):
                             if grid[i][j]==90:
                                 grid[i][j]=909
+                elif grid[rowPos][columnPos]>0 and grid[rowPos][columnPos]<9:
+                    if checkFlags(rowPos, columnPos) >= grid[rowPos][columnPos]:
+                        if columnPos!=0 and rowPos!=0 and grid[rowPos-1][columnPos-1]==0: flood(rowPos-1,columnPos-1)
+                        elif columnPos!=0 and rowPos!=0 and grid[rowPos-1][columnPos-1]==90:
+                            grid[rowPos-1][columnPos-1]=999
+                            defeat=True
+                            end=pygame.time.get_ticks()
+                        if columnPos!=19 and rowPos!=0 and grid[rowPos-1][columnPos+1]==0: flood(rowPos-1, columnPos+1)
+                        elif columnPos!=19 and rowPos!=0 and grid[rowPos-1][columnPos+1]==90:
+                            grid[rowPos-1][columnPos+1]=999
+                            defeat=True
+                            end=pygame.time.get_ticks()
+                        if rowPos!=0 and grid[rowPos-1][columnPos]==0: flood(rowPos-1, columnPos)
+                        elif rowPos!=0 and grid[rowPos-1][columnPos]==90:
+                            grid[rowPos-1][columnPos]=999
+                            defeat=True
+                            end=pygame.time.get_ticks()
+                        if columnPos!=0 and rowPos!=19 and grid[rowPos+1][columnPos-1]==0: flood(rowPos+1, columnPos-1)
+                        elif columnPos!=0 and rowPos!=19 and grid[rowPos+1][columnPos-1]==90:
+                            grid[rowPos+1][columnPos-1]=999
+                            defeat=True
+                            end=pygame.time.get_ticks()
+                        if columnPos!=19 and rowPos!=19 and grid[rowPos+1][columnPos+1]==0: flood(rowPos+1, columnPos+1)
+                        elif columnPos!=19 and rowPos!=19 and grid[rowPos+1][columnPos+1]==90:
+                            grid[rowPos+1][columnPos+1]=999
+                            defeat=True
+                            end=pygame.time.get_ticks()
+                        if rowPos!=19 and grid[rowPos+1][columnPos]==0: flood(rowPos+1, columnPos)
+                        elif rowPos!=19 and grid[rowPos+1][columnPos]==90:
+                            grid[rowPos+1][columnPos]=999
+                            defeat=True
+                            end=pygame.time.get_ticks()
+                        if columnPos!=19 and grid[rowPos][columnPos+1]==0: flood(rowPos, columnPos+1)
+                        elif columnPos!=19 and grid[rowPos][columnPos+1]==90:
+                            grid[rowPos][columnPos+1]=999
+                            defeat=True
+                            end=pygame.time.get_ticks()
+                        if columnPos!=0 and grid[rowPos][columnPos-1]==0: flood(rowPos, columnPos-1)
+                        elif columnPos!=0 and grid[rowPos][columnPos-1]==90:
+                            grid[rowPos][columnPos-1]=999
+                            defeat=True
+                            end=pygame.time.get_ticks()
                 if count ==0:
                     start=pygame.time.get_ticks()
                     count+=1
@@ -195,7 +237,11 @@ while running:
         for minePos in range (200):
             minePosColumn=random.randint(0,19)
             minePosRow=random.randint(0,19)
-            if (minePosColumn, minePosRow)!=(columnPos-1, rowPos-1) and (minePosColumn, minePosRow)!=(columnPos, rowPos-1) and (minePosColumn, minePosRow)!=(columnPos+1, rowPos-1) and (minePosColumn, minePosRow)!=(columnPos-1, rowPos) and (minePosColumn, minePosRow)!=(columnPos, rowPos) and (minePosColumn, minePosRow)!=(columnPos+1, rowPos) and (minePosColumn, minePosRow)!=(columnPos-1, rowPos+1) and (minePosColumn, minePosRow)!=(columnPos, rowPos+1) and (minePosColumn, minePosRow)!=(columnPos+1, rowPos+1) and grid[minePosRow][minePosColumn]!=90:       
+            if (minePosColumn, minePosRow)!=(columnPos-1, rowPos-1) and (minePosColumn, minePosRow)!=(columnPos, rowPos-1)\
+                and (minePosColumn, minePosRow)!=(columnPos+1, rowPos-1) and (minePosColumn, minePosRow)!=(columnPos-1, rowPos)\
+                and (minePosColumn, minePosRow)!=(columnPos, rowPos) and (minePosColumn, minePosRow)!=(columnPos+1, rowPos)\
+                and (minePosColumn, minePosRow)!=(columnPos-1, rowPos+1) and (minePosColumn, minePosRow)!=(columnPos, rowPos+1)\
+                and (minePosColumn, minePosRow)!=(columnPos+1, rowPos+1) and grid[minePosRow][minePosColumn]!=90:       
                 grid[minePosRow][minePosColumn]=90
                 mineCount=mineCount+1
             if mineCount==48:
@@ -224,7 +270,12 @@ while running:
                     count+=1
                 flagCount=mineCount
                 win=True
-            
+
+    if defeat:
+        for i in range(len(grid)):
+            for j in range(len(grid[i])):
+                if grid[i][j]==10:
+                    grid[i][j]=101
 
     for row in range(20):
         for column in range(20):
@@ -258,8 +309,19 @@ while running:
                 screen.blit(mineFail,[20*(column),(20*(row))+60])
             elif grid[row][column]==909:
                 screen.blit(mine,[20*(column),(20*(row))+60])
+            elif grid[row][column]==101:
+                screen.blit(notMine,[20*(column),(20*(row))+60])
             if tileIsPressed and grid[rowPos][columnPos] not in (1, 2, 3, 4, 5, 6, 7, 8, 10, 900) and mousePos[1]>60:
-                screen.blit(bgtile,[20*(columnPos),(20*(rowPos))+60]) 
+                screen.blit(bgtile,[20*(columnPos),(20*(rowPos))+60])
+            elif tileIsPressed and grid[rowPos][columnPos] in (1, 2, 3, 4, 5, 6, 7, 8) and mousePos[1]>60:
+                if columnPos!=0 and rowPos!=0 and grid[rowPos-1][columnPos-1]in (0, 90): screen.blit(bgtile,[20*(columnPos-1),(20*(rowPos-1))+60])
+                if columnPos!=19 and rowPos!=0 and grid[rowPos-1][columnPos+1]in (0, 90): screen.blit(bgtile,[20*(columnPos+1),(20*(rowPos-1))+60])
+                if rowPos!=0 and grid[rowPos-1][columnPos]in (0, 90): screen.blit(bgtile,[20*(columnPos),(20*(rowPos-1))+60])
+                if columnPos!=0 and rowPos!=19 and grid[rowPos+1][columnPos-1]in (0, 90): screen.blit(bgtile,[20*(columnPos-1),(20*(rowPos+1))+60])
+                if columnPos!=19 and rowPos!=19 and grid[rowPos+1][columnPos+1]in (0, 90): screen.blit(bgtile,[20*(columnPos+1),(20*(rowPos+1))+60])
+                if rowPos!=19 and grid[rowPos+1][columnPos]in (0, 90): screen.blit(bgtile,[20*(columnPos),(20*(rowPos+1))+60])
+                if columnPos!=19 and grid[rowPos][columnPos+1]in (0, 90): screen.blit(bgtile,[20*(columnPos+1),(20*(rowPos))+60])
+                if columnPos!=0 and grid[rowPos][columnPos-1] in (0, 90): screen.blit(bgtile,[20*(columnPos-1),(20*(rowPos))+60])
     
     if defeat:
         minutes=((end - start)//60000)
