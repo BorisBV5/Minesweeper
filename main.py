@@ -380,13 +380,19 @@ while running:
             minutes=((end - start)//60000)
             seconds=((end - start)//1000)-minutes*60
             if selectedDificulty==1:
-                if (end-start)<save['easy']:
+                if (end-start)<save['easy'] and save['easy']!=0:
+                    save['easy']=end - start
+                elif save['easy']==0:
                     save['easy']=end - start
             elif selectedDificulty==2:
-                if (end-start)<save['medium']:
+                if (end-start)<save['mdium']:
+                    save['medium']=end - start
+                elif save['medium']==0:
                     save['medium']=end - start
             elif selectedDificulty==3:
                 if (end-start)<save['hard']:
+                    save['hard']=end - start
+                elif save['hard']==0:
                     save['hard']=end - start
         else:
             minutes=((pygame.time.get_ticks() - start)//60000)
