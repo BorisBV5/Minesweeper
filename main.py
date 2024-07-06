@@ -2,6 +2,8 @@
 #hidden tags: empty=-1 flaged mine=900 mine clicked=999 mines reveal=909
 #dificulty ez=48 med=72 hard=80
 
+#Spagetti code I wrote in high school(might fix later)(probably won't)
+
 import random
 import pygame
 import json
@@ -309,7 +311,7 @@ while running:
                 pass
             else:
                 for i in range(len(grid)):
-                    for j in range(len(grid[i])):
+                    for j in range(len(grid[i])):  #fix this something isn't right here
                         if grid[i][j]==90:
                             grid[i][j]=900
                             end=pygame.time.get_ticks()
@@ -326,7 +328,7 @@ while running:
                 if grid[i][j]==10:
                     grid[i][j]=101
 
-    if dificultySelection==False:    
+    if dificultySelection==False:    #this is garbage(make it not garbage)
         for row in range(20):
             for column in range(20):
                 color = lgray
@@ -399,7 +401,6 @@ while running:
             seconds=((pygame.time.get_ticks() - start)//1000)-minutes*60
         if count>0: 
             timer=myFont.render(str(minutes).zfill(2)+":"+str(seconds).zfill(2), 1, red)
-        if count>0: 
             time=(pygame.time.get_ticks() - start)
 
         if buttonIsPressed:
